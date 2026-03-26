@@ -1,0 +1,34 @@
+# Build
+bin/
+obj/
+
+# IDE
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# NuGet
+*.nupkg
+.nuget/packages/
+packages/
+
+# Logs
+*.log
+
+# Secrets
+appsettings.*.json
+!appsettings.Development.json
+
+# Docker
+.dockerignore
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude
+.claude/
+.mcp.json

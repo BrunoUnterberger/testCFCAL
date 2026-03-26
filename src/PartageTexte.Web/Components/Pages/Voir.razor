@@ -1,0 +1,207 @@
+@page "/voir/{Id:guid}"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@inject IClientPartage ClientPartage
+
+<PageTitle>Accéder au partage — CFCAL</PageTitle>
+
+<div class="container-narrow">
+
+    @if (_chargement)
+    {
+        <div class="d-flex justify-content-center" style="padding: 4rem 0;">
+            <div class="spinner-border" style="width:2rem;height:2rem;border-width:3px;color:var(--c-red);">
+                <span class="visually-hidden">Chargement...</span>
+            </div>
+        </div>
+    }
+    else if (_introuvable)
+    {
+        <div class="card" style="text-align:center; padding: 3rem 2rem;">
+            <div class="state-icon state-icon-error">🔒</div>
+            <h2 style="font-size:1.1rem; font-weight:700; margin:0 0 .5rem;">Partage introuvable</h2>
+            <p style="color:var(--c-text-muted); font-size:.875rem; margin:0 0 1.5rem;">
+                Ce partage n'existe pas, a expiré ou a atteint son nombre maximum de lectures.
+            </p>
+            <a href="/" class="btn btn-primary btn-sm" style="margin:0 auto;">
+                Créer un partage
+            </a>
+        </div>
+    }
+    else if (_demandeMotDePasse)
+    {
+        <div class="card">
+            <div class="card-header d-flex align-items-center gap-2">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--c-warning)" stroke-width="2" stroke-linecap="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+                Partage protégé par mot de passe
+            </div>
+            <div class="card-body stack stack-md">
+
+                @if (_erreur is not null)
+                {
+                    <div class="alert alert-danger">@_erreur</div>
+                }
+
+                <div>
+                    <label class="form-label" for="mdp">Mot de passe</label>
+                    <input id="mdp" type="password" class="form-control"
+                           @bind="_motDePasse"
+                           @onkeyup="OnToucheEnfoncee"
+                           placeholder="Saisissez le mot de passe..." />
+                </div>
+
+                <button class="btn btn-primary w-100" @onclick="AccederAvecMotDePasseAsync" disabled="@_enCours">
+                    @if (_enCours)
+                    {
+                        <span class="spinner-border"></span>
+                    }
+                    Accéder au contenu
+                </button>
+
+            </div>
+        </div>
+    }
+    else if (_contenu is not null)
+    {
+        <div class="stack stack-md">
+
+            <div class="card">
+                <div class="card-header d-flex align-items-center gap-2">
+                    @if (_contenu.TypeContenu == PartageTexte.Domain.Enumerations.TypeContenu.MotDePasse)
+                    {
+                        <span class="badge badge-red">Mot de passe</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-gray">Texte</span>
+                    }
+                    <span style="color:var(--c-text-muted); font-size:.8rem;">Contenu déchiffré</span>
+                </div>
+                <div class="card-body">
+                    @if (_contenu.TypeContenu == PartageTexte.Domain.Enumerations.TypeContenu.MotDePasse)
+                    {
+                        <div class="input-group">
+                            <input type="@(_afficher ? "text" : "password")"
+                                   class="form-control font-mono"
+                                   readonly value="@_contenu.Contenu" />
+                            <button class="btn btn-outline-secondary" @onclick="() => _afficher = !_afficher">
+                                @if (_afficher)
+                                {
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>
+                                    </svg>
+                                    <span>Masquer</span>
+                                }
+                                else
+                                {
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                                    </svg>
+                                    <span>Afficher</span>
+                                }
+                            </button>
+                        </div>
+                    }
+                    else
+                    {
+                        <pre>@_contenu.Contenu</pre>
+                    }
+                </div>
+            </div>
+
+            <div class="alert alert-info" style="font-size:.8rem;">
+                Ce contenu a été lu et ne sera plus accessible si une limite de lectures était définie.
+                Conservez-le en lieu sûr.
+            </div>
+
+            <a href="/" class="btn btn-outline-primary btn-sm">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                Créer un partage
+            </a>
+
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+
+    private bool _chargement = true;
+    private bool _introuvable;
+    private bool _demandeMotDePasse;
+    private bool _afficher;
+    private bool _enCours;
+    private string? _erreur;
+    private string _motDePasse = string.Empty;
+    private PartageTexte.Application.DTOs.ContenuPartageReponse? _contenu;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var info = await ClientPartage.ObtenirInfoAsync(Id);
+
+        if (info is null)
+        {
+            _introuvable = true;
+            _chargement = false;
+            return;
+        }
+
+        if (info.EstProtege)
+        {
+            _demandeMotDePasse = true;
+            _chargement = false;
+            return;
+        }
+
+        await AccederAsync(null);
+        _chargement = false;
+    }
+
+    private async Task AccederAsync(string? motDePasse)
+    {
+        _contenu = await ClientPartage.AccederAsync(new PartageTexte.Application.DTOs.AccederPartageRequete
+        {
+            Id = Id,
+            MotDePasse = motDePasse
+        });
+
+        if (_contenu is null)
+            _introuvable = true;
+    }
+
+    private async Task AccederAvecMotDePasseAsync()
+    {
+        _erreur = null;
+        _enCours = true;
+
+        try
+        {
+            _contenu = await ClientPartage.AccederAsync(new PartageTexte.Application.DTOs.AccederPartageRequete
+            {
+                Id = Id,
+                MotDePasse = _motDePasse
+            });
+
+            if (_contenu is null)
+            {
+                _erreur = "Mot de passe incorrect ou partage introuvable.";
+                return;
+            }
+
+            _demandeMotDePasse = false;
+        }
+        finally
+        {
+            _enCours = false;
+        }
+    }
+
+    private async Task OnToucheEnfoncee(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+            await AccederAvecMotDePasseAsync();
+    }
+}

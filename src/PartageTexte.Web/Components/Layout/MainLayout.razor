@@ -1,0 +1,47 @@
+@inherits LayoutComponentBase
+
+<div class="cfcal-page">
+
+    <!-- ── Header ── -->
+    <header class="cfcal-header">
+        <div class="cfcal-header-inner">
+
+            <a href="/" class="cfcal-brand">
+                <img src="https://public.cfcal-banque.fr/wp-content/themes/studiometa/static/img/logo-cfcal.png"
+                     alt="CFCAL" height="36" style="width:auto;" />
+            </a>
+
+            <nav>
+                <a href="/" class="btn btn-primary btn-sm">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                    Nouveau partage
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- ── Contenu ── -->
+    <main class="cfcal-content">
+        @Body
+    </main>
+
+    <!-- ── Footer ── -->
+    <footer class="cfcal-footer">
+        <div class="cfcal-footer-inner">
+            <span>© @DateTime.Now.Year <strong>CFCAL-Banque</strong></span>
+            <div class="cfcal-footer-badges">
+                <span class="cfcal-badge">Chiffrement AES-256</span>
+                <span class="cfcal-badge">Données temporaires</span>
+                <span class="cfcal-badge" style="color: var(--c-red);">Confidentiel</span>
+            </div>
+        </div>
+    </footer>
+</div>
+
+<div id="blazor-error-ui">
+    Une erreur est survenue.
+    <a href="" class="reload">Recharger</a>
+    <a class="dismiss">✕</a>
+</div>
