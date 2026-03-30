@@ -1,0 +1,52 @@
+services:
+
+  api:
+    image: unterbergerbruno/partage-texte-api:latest
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      Chiffrement__Cle: "${CFCAL_CHIFFREMENT_CLE}"
+      Stockage__Chemin: /data/partages
+    volumes:
+      - partages_data:/data/partages
+    networks:
+      - partage_internal
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.role == worker
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+
+  web:
+    image: unterbergerbruno/partage-texte-web:latest
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      Api__UrlBase: "http://api:8080"
+    networks:
+      - proxy
+      - partage_internal
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.role == worker
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+
+volumes:
+  partages_data:
+
+networks:
+  proxy:
+    external: true
+  partage_internal:
+    driver: overlay

@@ -1,0 +1,84 @@
+@page "/confirme/{Id:guid}"
+@rendermode InteractiveServer
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<PageTitle>Partage créé — CFCAL</PageTitle>
+
+<div class="container-narrow">
+    <div class="card">
+
+        <div class="card-header d-flex align-items-center gap-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-success)" stroke-width="2.5" stroke-linecap="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            Partage créé avec succès
+        </div>
+
+        <div class="card-body stack stack-md">
+
+            <p style="margin:0; color: var(--c-text-muted); font-size:.875rem;">
+                Copiez ce lien et transmettez-le de manière sécurisée (messagerie chiffrée, canal sécurisé).
+            </p>
+
+            <div>
+                <label class="form-label">Lien de partage</label>
+                <div class="input-group">
+                    <input type="text" class="form-control font-mono" readonly value="@_lien" id="lienPartage" />
+                    <button class="btn @(_copie ? "btn-outline-secondary" : "btn-primary")" type="button" @onclick="CopierLienAsync">
+                        @if (_copie)
+                        {
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            <span>Copié !</span>
+                        }
+                        else
+                        {
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            </svg>
+                            <span>Copier</span>
+                        }
+                    </button>
+                </div>
+            </div>
+
+            <div class="alert alert-warning" style="font-size:.8rem;">
+                <strong>Important :</strong> ce lien ne sera plus accessible après expiration ou le nombre maximum de lectures atteint. Ne le partagez pas via un canal non sécurisé.
+            </div>
+
+        </div>
+
+        <div class="card-footer">
+            <a href="/" class="btn btn-outline-primary btn-sm">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                Créer un autre partage
+            </a>
+        </div>
+
+    </div>
+</div>
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+
+    private string _lien = string.Empty;
+    private bool _copie;
+
+    protected override void OnInitialized()
+    {
+        _lien = $"{Navigation.BaseUri}voir/{Id}";
+    }
+
+    private async Task CopierLienAsync()
+    {
+        await JS.InvokeVoidAsync("navigator.clipboard.writeText", _lien);
+        _copie = true;
+        await Task.Delay(2000);
+        _copie = false;
+        StateHasChanged();
+    }
+}

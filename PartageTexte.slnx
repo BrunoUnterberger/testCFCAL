@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/PartageTexte.Api/PartageTexte.Api.csproj" />
+    <Project Path="src/PartageTexte.Application/PartageTexte.Application.csproj" />
+    <Project Path="src/PartageTexte.Domain/PartageTexte.Domain.csproj" />
+    <Project Path="src/PartageTexte.Infrastructure/PartageTexte.Infrastructure.csproj" />
+    <Project Path="src/PartageTexte.Web/PartageTexte.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/PartageTexte.Tests/PartageTexte.Tests.csproj" />
+  </Folder>
+</Solution>
