@@ -47,6 +47,7 @@
                     <label class="form-label" for="mdp">Mot de passe</label>
                     <input id="mdp" type="password" class="form-control"
                            @bind="_motDePasse"
+                           @bind:event="oninput"
                            @onkeyup="OnToucheEnfoncee"
                            placeholder="Saisissez le mot de passe..." />
                 </div>
