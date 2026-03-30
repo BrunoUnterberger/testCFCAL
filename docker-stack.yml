@@ -41,25 +41,9 @@ services:
         limits:
           memory: 256M
           cpus: '0.5'
-      labels:
-        - "traefik.enable=true"
-        - "traefik.swarm.network=proxy"
-        - "traefik.http.routers.partage-http.entrypoints=web"
-        - "traefik.http.routers.partage-http.rule=Host(`partage.home.staging.gen.in`)"
-        - "traefik.http.routers.partage-http.middlewares=partage-https"
-        - "traefik.http.middlewares.partage-https.redirectscheme.scheme=https"
-        - "traefik.http.routers.partage.rule=Host(`partage.home.staging.gen.in`)"
-        - "traefik.http.routers.partage.entrypoints=websecure"
-        - "traefik.http.routers.partage.tls.certresolver=myresolver"
-        - "traefik.http.services.partage.loadbalancer.server.port=8080"
 
 volumes:
   partages_data:
-    driver: local
-    driver_opts:
-      type: nfs
-      o: addr=192.168.101.13,nolock,soft,rw
-      device: :/volume1/Swarm/partage/data
 
 networks:
   proxy:
